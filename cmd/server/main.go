@@ -53,9 +53,11 @@ func main() {
 		server.TLSConfig = &tls.Config{
 			RootCAs: certpool,
 		}
+		log.Infof("Starting server on: %s:%s", *listenAddress, *listenPort)
 		log.Error(server.ListenAndServeTLS(*tlsCert, *tlsKey), "Error serving TLS")
-		log.Infof("Starting server on port: %s", *listenPort)
 	} else {
+		log.Infof("Starting server on: %s:%s", *listenAddress, *listenPort)
 		log.Error(server.ListenAndServe(), "Error serving non-TLS connection")
+
 	}
 }

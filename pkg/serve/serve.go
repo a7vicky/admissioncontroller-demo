@@ -20,7 +20,7 @@ func NewServer(address string, port string) *http.Server {
 	mux.HandleFunc("/validate-ns", ah.Serve(nsValidation))
 
 	return &http.Server{
-		Addr:    fmt.Sprintf(address, port),
+		Addr:    fmt.Sprintf("%s:%s", address, port),
 		Handler: mux,
 	}
 }
