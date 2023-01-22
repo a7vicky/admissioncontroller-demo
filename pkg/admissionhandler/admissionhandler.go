@@ -7,8 +7,7 @@ import (
 	"net/http"
 
 	"github.com/a7vicky/admissioncontroller-demo/pkg/admissionwebhook"
-	admission "k8s.io/api/admission/v1beta1"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	admission "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	log "k8s.io/klog/v2"
@@ -68,9 +67,11 @@ func (h *admissionHandler) Serve(hook admissionwebhook.Hook) http.HandlerFunc {
 			Response: &admission.AdmissionResponse{
 				UID:     review.Request.UID,
 				Allowed: result.Allowed,
-				Result:  &meta.Status{Message: result.Msg},
 			},
 		}
+
+		admissionResponse.APIVersion = admission.SchemeGroupVersion.String()
+		admissionResponse.Kind = "AdmissionReview"
 
 		res, err := json.Marshal(admissionResponse)
 		if err != nil {
