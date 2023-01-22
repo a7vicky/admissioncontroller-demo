@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook
+  namespace: validation-webhook
+  labels:
+    app: webhook
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: console
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: console
+      name: webhook
+    spec:
+      affinity: {}
+      containers:
+      - command:
+        - admission-webhook-demo
+        - -tls
+        - -cacert
+        - /service-ca/service-ca.crt
+        - -tlscert
+        - /service-certs/tls.crt
+        - -tlskey
+        - /service-certs/tls.key
+        image: quay.io/aabhishe/webhook-demo:v1
+        name: webhook
+        ports:
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - mountPath: /service-certs
+          name: service-certs
+          readOnly: true
+        - mountPath: /service-ca
+          name: service-ca
+          readOnly: true
+      volumes:
+      - name: service-certs
+        secret:
+          defaultMode: 420
+          secretName: webhook-cert
+      - configMap:
+          defaultMode: 420
+          name: webhook-cert
+        name: service-ca
+
+
+
+
+
+

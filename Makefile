@@ -11,4 +11,10 @@ build:
 .PHONY: podman-build
 podman-build:
 	@echo "\n📦 Building admission-webhook-demo Podman image..."
-	podman build --tag admission-webhook-demo:latest -f Dockerfile
+	podman build --tag  quay.io/aabhishe/webhook-demo:v1 -f Dockerfile
+
+.PHONY: build-push
+build-push:
+	@echo "\n📦 Building admission-webhook-demo Podman image and push to quay..."
+	podman build --tag  quay.io/aabhishe/webhook-demo:v1 -f Dockerfile
+	podman push quay.io/aabhishe/webhook-demo:v1

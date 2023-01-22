@@ -1,0 +1,23 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"   
+  name: "namespace-validation.example.com"
+webhooks:
+- name: "namespace-validation.example.com"
+  rules:
+  - apiGroups:   [""]
+    apiVersions: ["v1"]
+    operations:  ["CREATE"]
+    resources:   ["namespaces"]
+    scope:       "Cluster"
+  clientConfig:
+    service:
+      name: webhook
+      namespace: validation-webhook
+      path: /validate-ns
+      port: 443
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  timeoutSeconds: 5

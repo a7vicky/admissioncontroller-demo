@@ -23,4 +23,3 @@ Create validationwebhook configuration
 $ kubectl create -f deploy/webhook-example.yaml
 $ kubectl create ns demo
 ```
-
