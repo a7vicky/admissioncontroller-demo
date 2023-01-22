@@ -1,6 +1,6 @@
 # admissioncontroller-demo
 
-### genrate-certificate
+### generate-certificate
 
 ```bash
 $ openssl req -newkey rsa:2048 -nodes -keyout tls.key -out tls.csr
