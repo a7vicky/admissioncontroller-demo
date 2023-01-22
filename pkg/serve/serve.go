@@ -8,7 +8,7 @@ import (
 	"github.com/a7vicky/admissioncontroller-demo/pkg/validation"
 )
 
-func NewServer(port string) *http.Server {
+func NewServer(address string, port string) *http.Server {
 
 	// instance of hook
 	nsValidation := validation.NewValidationHook()
@@ -20,7 +20,7 @@ func NewServer(port string) *http.Server {
 	mux.HandleFunc("/validate-ns", ah.Serve(nsValidation))
 
 	return &http.Server{
-		Addr:    fmt.Sprintf(":%s", port),
+		Addr:    fmt.Sprintf(address, port),
 		Handler: mux,
 	}
 }

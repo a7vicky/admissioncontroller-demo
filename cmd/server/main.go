@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,16 +15,20 @@ import (
 )
 
 var (
-	tlscert, tlskey, port string
+	listenAddress = flag.String("listen", "0.0.0.0", "listen address")
+	listenPort    = flag.String("port", "8443", "port to listen on")
+
+	useTLS  = flag.Bool("tls", false, "Use TLS? Must specify -tlskey, -tlscert, -cacert")
+	tlsKey  = flag.String("tlskey", "", "TLS Key for TLS")
+	tlsCert = flag.String("tlscert", "", "TLS Certificate")
+	caCert  = flag.String("cacert", "", "CA Cert file")
 )
 
 func main() {
-	flag.StringVar(&tlscert, "tlscert", "hack/certs/tls.crt", "Path to the TLS certificate")
-	flag.StringVar(&tlskey, "tlskey", "hack/certs/tls.key", "Path to the TLS key")
-	flag.StringVar(&port, "port", "8443", "The port on which to listen")
+
 	flag.Parse()
 
-	server := serve.NewServer(port)
+	server := serve.NewServer(*listenAddress, *listenPort)
 
 	go func() {
 		// listen shutdown signal
@@ -34,9 +41,21 @@ func main() {
 		}
 	}()
 
-	log.Infof("Starting server on port: %s", port)
-	if err := server.ListenAndServeTLS(tlscert, tlskey); err != nil {
-		log.Errorf("Failed to listen and serve: %v", err)
-		os.Exit(1)
+	if *useTLS {
+		cafile, err := ioutil.ReadFile(*caCert)
+		if err != nil {
+			log.Error(err, "Couldn't read CA cert file")
+			os.Exit(1)
+		}
+		certpool := x509.NewCertPool()
+		certpool.AppendCertsFromPEM(cafile)
+
+		server.TLSConfig = &tls.Config{
+			RootCAs: certpool,
+		}
+		log.Error(server.ListenAndServeTLS(*tlsCert, *tlsKey), "Error serving TLS")
+		log.Infof("Starting server on port: %s", *listenPort)
+	} else {
+		log.Error(server.ListenAndServe(), "Error serving non-TLS connection")
 	}
 }

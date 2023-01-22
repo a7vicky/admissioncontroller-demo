@@ -1,0 +1,6 @@
+.coverage
+/bin
+*.out
+/coverage.txt
+/.vscode
+*.code-workspace
